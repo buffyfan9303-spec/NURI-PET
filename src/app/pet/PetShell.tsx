@@ -3,6 +3,7 @@ import { Outlet, NavLink } from 'react-router-dom'
 import { Home, Search, CalendarHeart, LayoutGrid, Plus } from 'lucide-react'
 import { useConsumer } from '@/stores/consumer'
 import { addConditionLog } from '@/lib/consumer/api'
+import { PageFade } from '@/components/PageFade'
 import { QUICK } from '@/lib/mock/pet'
 import '@/features/pet/pet.css'
 
@@ -50,7 +51,9 @@ export function PetShell() {
   return (
     <div className="pet-app">
       <div className={`pet-screen${sheet ? ' is-dim' : ''}`}>
-        <Outlet context={ctx} />
+        <PageFade>
+          <Outlet context={ctx} />
+        </PageFade>
       </div>
 
       <nav className="pet-nav">

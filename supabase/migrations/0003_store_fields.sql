@@ -10,7 +10,9 @@ alter table public.stores add column if not exists image_url text;
 alter table public.stores add column if not exists phone text;
 
 -- refresh the public directory view to expose them
-create or replace view public.store_directory as
+-- (drop first: create-or-replace can't reorder/insert columns mid-list)
+drop view if exists public.store_directory;
+create view public.store_directory as
   select s.id, s.name, s.type, s.open, s.close, s.intro, s.address, s.image_url,
          (select count(*) from public.services sv where sv.store_id = s.id) as service_count,
          (select min(price) from public.services sv where sv.store_id = s.id) as from_price

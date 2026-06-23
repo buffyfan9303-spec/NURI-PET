@@ -77,24 +77,28 @@
   --nav-bg: rgba(8, 9, 10, 0.72);
 }
 
-/* shared entrance motion utility */
-@keyframes npUp {
+/* Page-level cohesive fade (Stripe-like). The old per-element staggered
+   slide-up ("투두둑 따로따로 이동") is removed — a page now appears as ONE unit. */
+@keyframes npPageFade {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(3px);
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
+.page-fade {
+  animation: npPageFade 0.24s var(--ease) both;
+}
+/* legacy: elements that used the staggered entrance now appear instantly;
+   the page-level fade carries the transition. */
 .np-an {
-  animation: npUp 0.5s var(--ease) both;
-  animation-delay: var(--d, 0ms);
+  animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .np-an {
-    opacity: 1 !important;
-    transform: none !important;
+  .page-fade {
+    animation: none;
   }
 }

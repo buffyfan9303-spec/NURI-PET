@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import { PageFade } from '@/components/PageFade'
 import { useUI } from '@/stores/ui'
 import { cn } from '@/lib/cn'
 import './operator.css'
@@ -13,7 +14,9 @@ export function OperatorShell() {
       <div className="op-main">
         <TopBar />
         <main className="op-content">
-          <Outlet />
+          <PageFade>
+            <Outlet />
+          </PageFade>
         </main>
       </div>
     </div>
