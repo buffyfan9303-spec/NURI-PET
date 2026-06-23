@@ -50,6 +50,13 @@ export function CustomersPage() {
   const updateCustomer = useData((s) => s.updateCustomer)
   const addPet = useData((s) => s.addPet)
 
+  // 고객별 펫 수 — 행마다 pets 전체를 훑던 것(O(고객×펫), 검색 타이핑마다)을 1회 집계 맵(O(펫))으로.
+  const petCountByCustomer = useMemo(() => {
+    const m = new Map<string, number>()
+    for (const p of pets) m.set(p.customerId, (m.get(p.customerId) ?? 0) + 1)
+    return m
+  }, [pets])
+
   const [query, setQuery] = useState('')
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null)
@@ -220,7 +227,7 @@ export function CustomersPage() {
               <div className="cust-empty">검색 결과가 없습니다.</div>
             )}
             {filtered.map((c) => {
-              const cPets = petsOfCustomer(c.id)
+              const cPetCount = petCountByCustomer.get(c.id) ?? 0
               const badge = noShowBadge(c.noShowScore)
               const active = c.id === selectedCustomerId
               return (
@@ -243,7 +250,7 @@ export function CustomersPage() {
                     {badge && <span className={`np-badge ${badge.tone}`}>{badge.label}</span>}
                     <span className="cust-row-pets">
                       <PawPrint size={12} />
-                      {cPets.length}
+                      {cPetCount}
                     </span>
                   </span>
                 </button>
