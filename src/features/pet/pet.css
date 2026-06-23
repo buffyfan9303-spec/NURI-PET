@@ -432,8 +432,8 @@
   justify-content: space-around;
   padding: 11px 14px 0;
   background: var(--nav-bg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-top: 1px solid var(--line);
 }
 .pet-nav > a,

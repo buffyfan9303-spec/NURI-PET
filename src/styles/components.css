@@ -44,6 +44,9 @@
   background: var(--s2);
   border-color: var(--line2);
 }
+.np-btn:active {
+  transform: translateY(0.5px);
+}
 
 .np-btn-primary {
   border: none;
@@ -133,4 +136,5 @@
   outline: none;
   border-color: var(--accent);
   background: var(--s1);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }

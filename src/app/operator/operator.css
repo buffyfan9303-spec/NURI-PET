@@ -220,8 +220,8 @@
   flex: none;
   border-bottom: 1px solid var(--line);
   background: var(--nav-bg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .op-top-store {
   display: flex;

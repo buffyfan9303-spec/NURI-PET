@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { applyTheme, useUI } from '@/stores/ui'
@@ -11,20 +11,23 @@ import { PetShell } from '@/app/pet/PetShell'
 import { CommandPalette } from '@/components/CommandPalette/CommandPalette'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { RequireAuth, RequireOwner } from '@/features/auth/guards'
-import { DashboardPage } from '@/features/dashboard/DashboardPage'
-import { CalendarPage } from '@/features/appointments/CalendarPage'
-import { CustomersPage } from '@/features/customers/CustomersPage'
-import { PaymentsPage } from '@/features/payments/PaymentsPage'
-import { BoardingPage } from '@/features/boarding/BoardingPage'
-import { StaffPage } from '@/features/staff/StaffPage'
-import { MessagesPage } from '@/features/messages/MessagesPage'
-import { SettingsPage } from '@/features/settings/SettingsPage'
 import { ConsumerAuth } from '@/features/pet/ConsumerAuth'
-import { ConsumerHome } from '@/features/pet/ConsumerHome'
-import { Discover } from '@/features/pet/Discover'
-import { StoreDetail } from '@/features/pet/StoreDetail'
-import { MyBookings } from '@/features/pet/MyBookings'
-import { ConsumerMore } from '@/features/pet/ConsumerMore'
+
+// Route screens are code-split — each loads as its own chunk on first visit,
+// keeping the initial bundle small (the Suspense boundary lives in the shells).
+const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })))
+const CalendarPage = lazy(() => import('@/features/appointments/CalendarPage').then((m) => ({ default: m.CalendarPage })))
+const CustomersPage = lazy(() => import('@/features/customers/CustomersPage').then((m) => ({ default: m.CustomersPage })))
+const PaymentsPage = lazy(() => import('@/features/payments/PaymentsPage').then((m) => ({ default: m.PaymentsPage })))
+const BoardingPage = lazy(() => import('@/features/boarding/BoardingPage').then((m) => ({ default: m.BoardingPage })))
+const StaffPage = lazy(() => import('@/features/staff/StaffPage').then((m) => ({ default: m.StaffPage })))
+const MessagesPage = lazy(() => import('@/features/messages/MessagesPage').then((m) => ({ default: m.MessagesPage })))
+const SettingsPage = lazy(() => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const ConsumerHome = lazy(() => import('@/features/pet/ConsumerHome').then((m) => ({ default: m.ConsumerHome })))
+const Discover = lazy(() => import('@/features/pet/Discover').then((m) => ({ default: m.Discover })))
+const StoreDetail = lazy(() => import('@/features/pet/StoreDetail').then((m) => ({ default: m.StoreDetail })))
+const MyBookings = lazy(() => import('@/features/pet/MyBookings').then((m) => ({ default: m.MyBookings })))
+const ConsumerMore = lazy(() => import('@/features/pet/ConsumerMore').then((m) => ({ default: m.ConsumerMore })))
 
 const queryClient = new QueryClient()
 

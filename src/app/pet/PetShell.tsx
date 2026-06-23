@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { Outlet, NavLink } from 'react-router-dom'
 import { Home, Search, CalendarHeart, LayoutGrid, Plus } from 'lucide-react'
 import { useConsumer } from '@/stores/consumer'
@@ -51,9 +51,11 @@ export function PetShell() {
   return (
     <div className="pet-app">
       <div className={`pet-screen${sheet ? ' is-dim' : ''}`}>
-        <PageFade>
-          <Outlet context={ctx} />
-        </PageFade>
+        <Suspense fallback={null}>
+          <PageFade>
+            <Outlet context={ctx} />
+          </PageFade>
+        </Suspense>
       </div>
 
       <nav className="pet-nav">

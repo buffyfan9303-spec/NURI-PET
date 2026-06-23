@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
@@ -14,9 +15,11 @@ export function OperatorShell() {
       <div className="op-main">
         <TopBar />
         <main className="op-content">
-          <PageFade>
-            <Outlet />
-          </PageFade>
+          <Suspense fallback={null}>
+            <PageFade>
+              <Outlet />
+            </PageFade>
+          </Suspense>
         </main>
       </div>
     </div>
