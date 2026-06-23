@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { applyTheme, useUI } from '@/stores/ui'
 import { useSession } from '@/stores/session'
 import { useData } from '@/stores/data'
+import { useConsumer } from '@/stores/consumer'
 import { Landing } from '@/app/Landing'
 import { OperatorShell } from '@/app/operator/OperatorShell'
 import { PetShell } from '@/app/pet/PetShell'
@@ -18,10 +19,12 @@ import { BoardingPage } from '@/features/boarding/BoardingPage'
 import { StaffPage } from '@/features/staff/StaffPage'
 import { MessagesPage } from '@/features/messages/MessagesPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
-import { PetHome } from '@/features/pet/PetHome'
-import { PetTrend } from '@/features/pet/PetTrend'
-import { PetCare } from '@/features/pet/PetCare'
-import { PetMore } from '@/features/pet/PetMore'
+import { ConsumerAuth } from '@/features/pet/ConsumerAuth'
+import { ConsumerHome } from '@/features/pet/ConsumerHome'
+import { Discover } from '@/features/pet/Discover'
+import { StoreDetail } from '@/features/pet/StoreDetail'
+import { MyBookings } from '@/features/pet/MyBookings'
+import { ConsumerMore } from '@/features/pet/ConsumerMore'
 
 const queryClient = new QueryClient()
 
@@ -36,11 +39,13 @@ export default function App() {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  // Restore Supabase session once on load.
+  // Restore Supabase session once on load (operator + consumer).
   const initSession = useSession((s) => s.init)
+  const initConsumer = useConsumer((s) => s.init)
   useEffect(() => {
     void initSession()
-  }, [initSession])
+    void initConsumer()
+  }, [initSession, initConsumer])
 
   // Hydrate the store from Supabase for the signed-in store; reset on logout.
   const storeId = useSession((s) => s.user?.storeId)
@@ -74,12 +79,14 @@ export default function App() {
             </Route>
           </Route>
 
-          {/* Mobile owner app */}
+          {/* Consumer (보호자) marketplace */}
+          <Route path="/pet/login" element={<ConsumerAuth />} />
           <Route path="/pet" element={<PetShell />}>
-            <Route index element={<PetHome />} />
-            <Route path="trend" element={<PetTrend />} />
-            <Route path="care" element={<PetCare />} />
-            <Route path="more" element={<PetMore />} />
+            <Route index element={<ConsumerHome />} />
+            <Route path="discover" element={<Discover />} />
+            <Route path="store/:id" element={<StoreDetail />} />
+            <Route path="bookings" element={<MyBookings />} />
+            <Route path="more" element={<ConsumerMore />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
