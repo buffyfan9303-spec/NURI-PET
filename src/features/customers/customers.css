@@ -58,6 +58,8 @@
   background: transparent;
   color: inherit;
   transition: 0.14s var(--ease);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 52px;
 }
 .cust-row:hover {
   background: var(--s2);

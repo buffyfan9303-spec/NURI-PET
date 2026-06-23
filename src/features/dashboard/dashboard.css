@@ -91,6 +91,8 @@
   padding: 10px 12px;
   border-radius: var(--r-md);
   transition: 0.14s var(--ease);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 56px;
 }
 .appt-row:hover {
   background: var(--s2);
