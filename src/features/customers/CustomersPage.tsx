@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Search,
   Plus,
@@ -51,7 +51,7 @@ export function CustomersPage() {
   const addPet = useData((s) => s.addPet)
 
   const [query, setQuery] = useState('')
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>(customers[0].id)
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null)
 
   // --- inline form state ---
@@ -76,6 +76,10 @@ export function CustomersPage() {
   }, [q, customers, pets])
 
   const selected = customers.find((c) => c.id === selectedCustomerId)
+  // Auto-select the first customer once data has hydrated (or after deletion).
+  useEffect(() => {
+    if (!selected && customers.length > 0) setSelectedCustomerId(customers[0].id)
+  }, [selected, customers])
   const ownerPets = selected ? petsOfCustomer(selected.id) : []
   const activePet: Pet | undefined =
     ownerPets.find((p) => p.id === selectedPetId) ?? ownerPets[0]

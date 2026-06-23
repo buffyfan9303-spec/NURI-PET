@@ -1,11 +1,11 @@
 import { create } from 'zustand'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 
 /**
- * Mock auth/session — mirrors Supabase Auth + the tenant/role model (CLAUDE.md §5).
- * Replaceable later by Supabase Auth: `user` comes from the session, `storeId`
- * scopes every query (the RLS analogue), `role` gates owner-only surfaces.
+ * Auth/session backed by Supabase Auth (when configured). The session user is
+ * derived from the linked `staff` row + its store; `storeId` scopes data (RLS),
+ * `role` gates owner-only surfaces. Falls back to a no-backend stub otherwise.
  */
-
 export type Role = 'owner' | 'staff'
 
 export interface SessionUser {
@@ -17,62 +17,79 @@ export interface SessionUser {
   storeName: string
 }
 
-interface MockAccount extends SessionUser {
-  password: string
-}
-
-const STORE_NAME = '도그웰 살롱'
-
-const ACCOUNTS: MockAccount[] = [
-  { staffId: 'st1', name: '김미용', email: 'owner@dogwell.kr', password: 'nuri2026', role: 'owner', storeId: 'store1', storeName: STORE_NAME },
-  { staffId: 'st2', name: '이그루', email: 'staff@dogwell.kr', password: 'nuri2026', role: 'staff', storeId: 'store1', storeName: STORE_NAME },
-  { staffId: 'st3', name: '박트림', email: 'trim@dogwell.kr', password: 'nuri2026', role: 'staff', storeId: 'store1', storeName: STORE_NAME },
+export const DEMO_ACCOUNTS = [
+  { email: 'owner@dogwell.kr', role: 'owner' as Role, name: '김미용' },
+  { email: 'staff@dogwell.kr', role: 'staff' as Role, name: '이그루' },
+  { email: 'trim@dogwell.kr', role: 'staff' as Role, name: '박트림' },
 ]
-
-/** Public hint list for the login screen quick-fill (no passwords leaked beyond the demo pw). */
-export const DEMO_ACCOUNTS = ACCOUNTS.map((a) => ({ email: a.email, role: a.role, name: a.name }))
 export const DEMO_PASSWORD = 'nuri2026'
 
-const KEY = 'nuripet-session'
-
-function load(): SessionUser | null {
-  try {
-    const raw = localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as SessionUser) : null
-  } catch {
-    return null
+/* eslint-disable @typescript-eslint/no-explicit-any */
+async function loadStaff(userId: string, fallbackEmail: string): Promise<SessionUser | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase
+    .from('staff')
+    .select('id,name,role,store_id,email,stores(name)')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (error || !data) return null
+  const row = data as any
+  const store = Array.isArray(row.stores) ? row.stores[0] : row.stores
+  return {
+    staffId: row.id,
+    name: row.name,
+    email: row.email ?? fallbackEmail,
+    role: row.role,
+    storeId: row.store_id,
+    storeName: store?.name ?? '',
   }
 }
 
 interface SessionState {
   user: SessionUser | null
-  login: (email: string, password: string) => { ok: boolean; error?: string }
-  logout: () => void
+  initializing: boolean
+  init: () => Promise<void>
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>
+  logout: () => Promise<void>
 }
 
 export const useSession = create<SessionState>((set) => ({
-  user: load(),
-  login: (email, password) => {
-    const acc = ACCOUNTS.find((a) => a.email.toLowerCase() === email.trim().toLowerCase())
-    if (!acc || acc.password !== password) {
-      return { ok: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' }
+  user: null,
+  initializing: isSupabaseConfigured,
+
+  init: async () => {
+    if (!supabase) {
+      set({ initializing: false })
+      return
     }
-    const { password: _pw, ...user } = acc
-    void _pw
-    try {
-      localStorage.setItem(KEY, JSON.stringify(user))
-    } catch {
-      /* ignore */
+    const { data } = await supabase.auth.getSession()
+    if (data.session?.user) {
+      const u = await loadStaff(data.session.user.id, data.session.user.email ?? '')
+      set({ user: u })
     }
-    set({ user })
+    set({ initializing: false })
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const u = await loadStaff(session.user.id, session.user.email ?? '')
+        set({ user: u })
+      } else {
+        set({ user: null })
+      }
+    })
+  },
+
+  login: async (email, password) => {
+    if (!supabase) return { ok: false, error: 'Supabase가 설정되지 않았습니다.' }
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    if (error || !data.user) return { ok: false, error: '이메일 또는 비밀번호가 올바르지 않습니다.' }
+    const u = await loadStaff(data.user.id, data.user.email ?? email)
+    if (!u) return { ok: false, error: '연결된 직원 정보가 없습니다. 관리자에게 문의하세요.' }
+    set({ user: u })
     return { ok: true }
   },
-  logout: () => {
-    try {
-      localStorage.removeItem(KEY)
-    } catch {
-      /* ignore */
-    }
+
+  logout: async () => {
+    if (supabase) await supabase.auth.signOut()
     set({ user: null })
   },
 }))

@@ -127,6 +127,13 @@
   border-color: var(--line2);
   background: var(--s2);
 }
+.auth-loading {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  color: var(--tx2);
+  letter-spacing: -0.01em;
+}
 
 /* forbidden */
 .forbidden {

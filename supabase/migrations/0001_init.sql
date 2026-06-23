@@ -205,6 +205,7 @@ begin
   ]
   loop
     execute format('alter table public.%I enable row level security;', t);
+    execute format('drop policy if exists %1$s_rw on public.%1$I;', t);
     execute format($f$
       create policy %1$s_rw on public.%1$I
         for all to authenticated
@@ -216,6 +217,7 @@ end$$;
 
 -- stores: a user can see/manage only their own store
 alter table public.stores enable row level security;
+drop policy if exists stores_rw on public.stores;
 create policy stores_rw on public.stores
   for all to authenticated
   using (id = (select public.current_store_id()))

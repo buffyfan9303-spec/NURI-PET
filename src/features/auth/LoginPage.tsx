@@ -19,22 +19,21 @@ export function LoginPage() {
 
   const from = (location.state as LocState | null)?.from ?? '/app'
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const res = login(email, password)
-    if (res.ok) {
-      navigate(from, { replace: true })
-    } else {
-      setError(res.error ?? '로그인에 실패했습니다.')
-    }
+    setError('')
+    const res = await login(email, password)
+    if (res.ok) navigate(from, { replace: true })
+    else setError(res.error ?? '로그인에 실패했습니다.')
   }
 
-  const quick = (em: string) => {
+  const quick = async (em: string) => {
     setEmail(em)
     setPassword(DEMO_PASSWORD)
     setError('')
-    const res = login(em, DEMO_PASSWORD)
+    const res = await login(em, DEMO_PASSWORD)
     if (res.ok) navigate(from, { replace: true })
+    else setError(res.error ?? '로그인에 실패했습니다.')
   }
 
   return (

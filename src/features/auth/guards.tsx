@@ -6,7 +6,16 @@ import './auth.css'
 /** Gate for /app — unauthenticated users go to /login (remembering where). */
 export function RequireAuth() {
   const user = useSession((s) => s.user)
+  const initializing = useSession((s) => s.initializing)
   const location = useLocation()
+  if (initializing) {
+    return (
+      <div className="auth">
+        <div className="auth-glow" aria-hidden />
+        <div className="auth-loading">불러오는 중…</div>
+      </div>
+    )
+  }
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }

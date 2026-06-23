@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { applyTheme, useUI } from '@/stores/ui'
+import { useSession } from '@/stores/session'
+import { useData } from '@/stores/data'
 import { Landing } from '@/app/Landing'
 import { OperatorShell } from '@/app/operator/OperatorShell'
 import { PetShell } from '@/app/pet/PetShell'
@@ -33,6 +35,19 @@ export default function App() {
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
+
+  // Restore Supabase session once on load.
+  const initSession = useSession((s) => s.init)
+  useEffect(() => {
+    void initSession()
+  }, [initSession])
+
+  // Hydrate the store from Supabase for the signed-in store; reset on logout.
+  const storeId = useSession((s) => s.user?.storeId)
+  useEffect(() => {
+    if (storeId) void useData.getState().hydrate(storeId)
+    else useData.getState().reset()
+  }, [storeId])
 
   return (
     <QueryClientProvider client={queryClient}>

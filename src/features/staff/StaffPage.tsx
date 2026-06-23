@@ -1,5 +1,5 @@
 import type * as React from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { UserPlus, ShieldCheck, Crown, User, Info } from 'lucide-react'
 import {
   useData,
@@ -75,12 +75,23 @@ export function StaffPage() {
   const appts = useData((s) => s.appts)
   const services = useData((s) => s.services)
 
-  const [selected, setSelected] = useState<string>(staffList[0].id)
+  const [selected, setSelected] = useState<string>('')
+  useEffect(() => {
+    if (staffList.length > 0 && !staffList.some((s) => s.id === selected)) setSelected(staffList[0].id)
+  }, [staffList, selected])
   const selectedStaff = staffList.find((s) => s.id === selected) ?? staffList[0]
 
   // grid totals per day across all staff
   const dayTotals = WEEK_DAYS.map((d) => appts.filter((a) => a.date === d.date).length)
   const todayTimeline = countOn(appts, selected, DEMO_TODAY)
+
+  if (staffList.length === 0) {
+    return (
+      <div className="feat-ph">
+        <p>직원 정보를 불러오는 중…</p>
+      </div>
+    )
+  }
 
   return (
     <div>
